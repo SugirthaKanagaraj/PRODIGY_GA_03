@@ -1,0 +1,74 @@
+import random
+from collections import defaultdict
+
+# Function to build the Markov chain model
+def build_markov_chain(text, n=1):
+    """
+    Build a Markov chain model for text generation.
+    
+    Args:
+        text: Input string on which the model is based.
+        n: Order of the Markov chain (1 for bigrams, 2 for trigrams, etc.)
+        
+    Returns:
+        A dictionary where the keys are n-tuples of previous words/characters, 
+        and values are lists of possible next words/characters.
+    """
+    chain = defaultdict(list)
+    
+    # Tokenize the input text into words
+    words = text.split()
+
+    # Loop over the text and build the chain
+    for i in range(len(words) - n):
+        key = tuple(words[i:i + n])  # n-gram (tuple of previous words)
+        next_word = words[i + n]     # The word that follows the n-gram
+        chain[key].append(next_word)
+
+    return chain
+
+# Function to generate text using the Markov chain model
+def generate_text(chain, seed, length=100):
+    """
+    Generate text using the Markov chain model.
+    
+    Args:
+        chain: The Markov chain model (dictionary).
+        seed: The starting sequence (tuple of words).
+        length: The number of words to generate.
+        
+    Returns:
+        A generated string based on the Markov model.
+    """
+    result = list(seed)
+
+    for _ in range(length):
+        state = tuple(result[-len(seed):])  # Current state (last n words)
+        next_word = random.choice(chain.get(state, ["END"]))  # Get next word
+
+        if next_word == "END":
+            break
+
+        result.append(next_word)
+
+    return ' '.join(result)
+
+# Example text for the Markov chain (you can replace this with any large text)
+input_text = """
+The quick brown fox jumps over the lazy dog. The quick brown fox is very fast and agile.
+Foxes are small to medium-sized, omnivorous mammals belonging to several genera of the family Canidae.
+"""
+
+# Build the Markov chain model
+n_order = 2  # Use bigrams (pairs of words)
+markov_chain = build_markov_chain(input_text, n=n_order)
+
+# Choose a random seed (starting words)
+seed = random.choice(list(markov_chain.keys()))
+
+# Generate text using the model
+generated_text = generate_text(markov_chain, seed, length=50)
+
+# Output the generated text
+print("Generated Text:")
+print(generated_text)
